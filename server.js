@@ -6,6 +6,7 @@ const { Server } = require("socket.io");
 const fs = require("fs");
 const path = require("path");
 const winston = require("winston");
+const connectDB = require("./db/index.js");
 
 require("dotenv").config();
 
@@ -94,30 +95,62 @@ app.get("/check", (req, res) => {
   res.send("Hello, World!");
 });
 
-// Setup WebSocket server
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: "*", // Allow all origins (or specify allowed origins)
-  },
+// API route to fetch configuration based on deviceId
+app.get("/api/config/:deviceId", async (req, res) => {
+  const { deviceId } = req.params; // Extract deviceId from the URL
+
+  try {
+    // Query for configuration based on deviceId
+    const config = await Config.findOne({ deviceId });
+
+    if (config) {
+      // Return the found configuration as a JSON response
+      res.status(200).json(config);
+    } else {
+      // If no configuration is found for the given deviceId
+      res
+        .status(404)
+        .json({ message: "Configuration not found for the given deviceId" });
+    }
+  } catch (error) {
+    console.error("Error fetching configuration:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 });
 
-// Handle WebSocket connections
-io.on("connection", (socket) => {
-  logger.info(`A client connected: ${socket.id}`);
+// Connect to MongoDB
+connectDB()
+  .then(() => {
+    // Set up HTTP server
+    const server = http.createServer(app);
 
-  socket.on("message", (data) => {
-    logger.info(`Message received from client: ${data}`);
-    socket.broadcast.emit("message", data);
+    // Setup WebSocket server
+    const io = new Server(server, {
+      cors: {
+        origin: "*", // Allow all origins (or specify allowed origins)
+      },
+    });
+
+    // Handle WebSocket connections
+    io.on("connection", (socket) => {
+      logger.info(`A client connected: ${socket.id}`);
+
+      socket.on("message", (data) => {
+        logger.info(`Message received from client: ${data}`);
+        socket.broadcast.emit("message", data);
+      });
+
+      socket.on("disconnect", () => {
+        logger.info(`A client disconnected: ${socket.id}`);
+      });
+    });
+
+    // Start the server
+    const port = process.env.PORT || 3000;
+    server.listen(port, () => {
+      logger.info(`Server running on http://localhost:${port}`);
+    });
+  })
+  .catch((err) => {
+    console.log("MONGO db connection failed: " + err);
   });
-
-  socket.on("disconnect", () => {
-    logger.info(`A client disconnected: ${socket.id}`);
-  });
-});
-
-// Start the server
-const port = process.env.PORT || 3000;
-server.listen(port, () => {
-  logger.info(`Server running on http://localhost:${port}`);
-});
