@@ -7,6 +7,7 @@ const fs = require("fs");
 const path = require("path");
 const winston = require("winston");
 const connectDB = require("./db/index.js");
+const Config = require("./model/config.model.js");
 
 require("dotenv").config();
 
@@ -100,7 +101,7 @@ app.get("/api/config/:deviceId", async (req, res) => {
   const { deviceId } = req.params; // Extract deviceId from the URL
 
   try {
-    // Query for configuration based on deviceId
+  
     const config = await Config.findOne({ deviceId });
 
     if (config) {
