@@ -100,8 +100,8 @@ app.get("/check", (req, res) => {
 app.get("/api/config/:deviceId", async (req, res) => {
   const { deviceId } = req.params; // Extract deviceId from the URL
 
+  console.log("deviceId: ", deviceId);
   try {
-  
     const config = await Config.findOne({ deviceId });
 
     if (config) {

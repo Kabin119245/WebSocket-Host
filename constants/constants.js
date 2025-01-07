@@ -1,1 +1,1 @@
-DB_NAME = "kiotel_hkController";
+DB_NAME = "kiotel_hkcontroller";
