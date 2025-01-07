@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
-const { DB_NAME } = require("../constants/constants.js");
 
 require("dotenv").config();
 
 const connectDB = async () => {
+  const DB_NAME = "kiotel_hkcontroller";
   try {
     const connectionInstance = await mongoose.connect(
       `${process.env.MONGODB_URI}/${DB_NAME}`

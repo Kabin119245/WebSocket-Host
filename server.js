@@ -119,6 +119,17 @@ app.get("/api/config/:deviceId", async (req, res) => {
   }
 });
 
+// API route to fetch all configurations
+app.get("/api/configs", async (req, res) => {
+  try {
+    const configs = await Config.find();
+    res.status(200).json(configs);
+  } catch (error) {
+    console.error("Error fetching configurations:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
 // Connect to MongoDB
 connectDB()
   .then(() => {
