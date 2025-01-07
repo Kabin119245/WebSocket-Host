@@ -9,6 +9,8 @@ const winston = require("winston");
 const connectDB = require("./db/index.js");
 const Config = require("./model/config.model.js");
 
+const idRoutes = require("./routes/idRoute");
+
 require("dotenv").config();
 
 // Create logs directory if it doesn't exist (optional)
@@ -40,7 +42,7 @@ app.use(express.json());
 
 // Middleware for CORS (Cross-Origin Resource Sharing)
 app.use(cors());
-
+app.use("/api", idRoutes); 
 // Define a route to log interactions
 app.post("/api/log", (req, res) => {
   const logData = req.body;
